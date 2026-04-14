@@ -8,7 +8,11 @@ import {
 import { CreateShareDto, ShareInfoDto, UpdateShareDto } from './dto/share.dto';
 import { InjectKysely } from 'nestjs-kysely';
 import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { nanoIdGen, hashPassword, comparePasswordHash } from '../../common/helpers';
+import {
+  nanoIdGen,
+  hashPassword,
+  comparePasswordHash,
+} from '../../common/helpers';
 import { PageRepo } from '@docmost/db/repos/page/page.repo';
 import { TokenService } from '../auth/services/token.service';
 import { jsonToNode } from '../../collaboration/collaboration.util';
@@ -45,8 +49,9 @@ export class ShareService {
       throw new NotFoundException('Share not found');
     }
 
-    const isRestricted =
-      await this.pagePermissionRepo.hasRestrictedAncestor(share.pageId);
+    const isRestricted = await this.pagePermissionRepo.hasRestrictedAncestor(
+      share.pageId,
+    );
     if (isRestricted) {
       throw new NotFoundException('Share not found');
     }
@@ -64,7 +69,11 @@ export class ShareService {
     }
   }
 
-  async getShareTreeWithPassword(shareId: string, password: string | undefined, workspaceId: string) {
+  async getShareTreeWithPassword(
+    shareId: string,
+    password: string | undefined,
+    workspaceId: string,
+  ) {
     const share = await this.shareRepo.findById(shareId);
     if (!share || share.workspaceId !== workspaceId) {
       throw new NotFoundException('Share not found');
@@ -75,7 +84,10 @@ export class ShareService {
         throw new SharePasswordRequiredException(share.key);
       }
 
-      const isValidPassword = await comparePasswordHash(password, share.passwordHash);
+      const isValidPassword = await comparePasswordHash(
+        password,
+        share.passwordHash,
+      );
       if (!isValidPassword) {
         throw new SharePasswordRequiredException(share.key);
       }
@@ -127,7 +139,10 @@ export class ShareService {
       };
 
       if (updateShareDto.password !== undefined) {
-        if (updateShareDto.password === null || updateShareDto.password === '') {
+        if (
+          updateShareDto.password === null ||
+          updateShareDto.password === ''
+        ) {
           // Remove password
           updateData.passwordHash = null;
         } else {
@@ -155,7 +170,10 @@ export class ShareService {
         throw new SharePasswordRequiredException(share.key);
       }
 
-      const isValidPassword = await comparePasswordHash(dto.password, share.passwordHash);
+      const isValidPassword = await comparePasswordHash(
+        dto.password,
+        share.passwordHash,
+      );
       if (!isValidPassword) {
         throw new SharePasswordRequiredException(share.key);
       }
@@ -171,8 +189,9 @@ export class ShareService {
     }
 
     // Block access to restricted pages
-    const isRestricted =
-      await this.pagePermissionRepo.hasRestrictedAncestor(page.id);
+    const isRestricted = await this.pagePermissionRepo.hasRestrictedAncestor(
+      page.id,
+    );
     if (isRestricted) {
       throw new NotFoundException('Shared page not found');
     }

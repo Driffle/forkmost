@@ -285,9 +285,13 @@ export class AttachmentController {
     const spaceId = file.fields?.spaceId?.value;
 
     if (attachmentType === AttachmentType.Avatar) {
-      const oidcProvider = await this.authProviderRepo.findOidcProvider(workspace.id);
+      const oidcProvider = await this.authProviderRepo.findOidcProvider(
+        workspace.id,
+      );
       if (oidcProvider?.oidcAvatarAttribute) {
-        throw new ForbiddenException('Avatar is managed by your identity provider');
+        throw new ForbiddenException(
+          'Avatar is managed by your identity provider',
+        );
       }
     }
 
@@ -417,9 +421,13 @@ export class AttachmentController {
 
     // remove current user avatar
     if (type === AttachmentType.Avatar) {
-      const oidcProvider = await this.authProviderRepo.findOidcProvider(workspace.id);
+      const oidcProvider = await this.authProviderRepo.findOidcProvider(
+        workspace.id,
+      );
       if (oidcProvider?.oidcAvatarAttribute) {
-        throw new ForbiddenException('Avatar is managed by your identity provider');
+        throw new ForbiddenException(
+          'Avatar is managed by your identity provider',
+        );
       }
 
       await this.attachmentService.removeUserAvatar(user);

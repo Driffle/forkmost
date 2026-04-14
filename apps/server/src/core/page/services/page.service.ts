@@ -419,11 +419,7 @@ export class PageService {
 
       if (pageIdsToMove.length > 1) {
         // Update sub pages (all accessible pages except root)
-        await this.pageRepo.updatePages(
-          { spaceId },
-          childPageIds,
-          trx,
-        );
+        await this.pageRepo.updatePages({ spaceId }, childPageIds, trx);
       }
 
       if (pageIdsToMove.length > 0) {
@@ -456,9 +452,13 @@ export class PageService {
         );
 
         // Update watchers and remove those without access to new space
-        await this.watcherService.movePageWatchersToSpace(pageIdsToMove, spaceId, {
-          trx,
-        });
+        await this.watcherService.movePageWatchersToSpace(
+          pageIdsToMove,
+          spaceId,
+          {
+            trx,
+          },
+        );
 
         await this.aiQueue.add(QueueJob.PAGE_MOVED_TO_SPACE, {
           pageId: pageIdsToMove,
@@ -767,13 +767,15 @@ export class PageService {
       .selectFrom('page_ancestors')
       .selectAll('page_ancestors')
       .select((eb) =>
-        eb.exists(
-          eb
-            .selectFrom('pages as child')
-            .select(sql`1`.as('one'))
-            .whereRef('child.parentPageId', '=', 'page_ancestors.id')
-            .where('child.deletedAt', 'is', null),
-        ).as('hasChildren'),
+        eb
+          .exists(
+            eb
+              .selectFrom('pages as child')
+              .select(sql`1`.as('one'))
+              .whereRef('child.parentPageId', '=', 'page_ancestors.id')
+              .where('child.deletedAt', 'is', null),
+          )
+          .as('hasChildren'),
       )
       .execute();
 

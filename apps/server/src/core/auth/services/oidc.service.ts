@@ -18,9 +18,13 @@ import { validateAllowedEmail } from '../auth.util';
 import { UserRole } from '../../../common/helpers/types/permission';
 import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
-import { AttachmentType, MAX_AVATAR_SIZE_BYTES, validImageExtensions } from '../../attachment/attachment.constants';
+import {
+  AttachmentType,
+  MAX_AVATAR_SIZE_BYTES,
+  validImageExtensions,
+} from '../../attachment/attachment.constants';
 import { AttachmentService } from '../../attachment/services/attachment.service';
-import {SessionService} from "../../session/session.service";
+import { SessionService } from '../../session/session.service';
 
 interface CachedConfig {
   config: client.Configuration;
@@ -52,7 +56,7 @@ export class OidcService {
     private readonly workspaceService: WorkspaceService,
     private readonly attachmentService: AttachmentService,
     private readonly sessionService: SessionService,
-  ) { }
+  ) {}
 
   private async getCachedConfig(
     issuerUrl: string,
@@ -72,7 +76,7 @@ export class OidcService {
         new URL(issuerUrl),
         clientId,
         clientSecret,
-        client.ClientSecretPost(clientSecret)
+        client.ClientSecretPost(clientSecret),
       );
 
       const serverMetadata = config.serverMetadata();
@@ -320,15 +324,11 @@ export class OidcService {
         callbackUrl.searchParams.set('iss', iss);
       }
 
-      const tokens = await client.authorizationCodeGrant(
-        config,
-        callbackUrl,
-        {
-          expectedState: state,
-          expectedNonce: expectedNonce,
-          pkceCodeVerifier: codeVerifier,
-        },
-      );
+      const tokens = await client.authorizationCodeGrant(config, callbackUrl, {
+        expectedState: state,
+        expectedNonce: expectedNonce,
+        pkceCodeVerifier: codeVerifier,
+      });
 
       const claims = tokens.claims();
       if (!claims?.sub) {
@@ -444,7 +444,9 @@ export class OidcService {
             user.avatarUrl = avatarFileName;
           }
         } catch (err) {
-          this.logger.warn(`Failed to process base64 avatar: ${err instanceof Error ? err.message : 'Unknown error'}`);
+          this.logger.warn(
+            `Failed to process base64 avatar: ${err instanceof Error ? err.message : 'Unknown error'}`,
+          );
         }
       } else if (sanitizedUserinfo.avatarUrl) {
         try {
@@ -457,7 +459,9 @@ export class OidcService {
             user.avatarUrl = avatarFileName;
           }
         } catch (err) {
-          this.logger.warn(`Failed to process avatar URL: ${err instanceof Error ? err.message : 'Unknown error'}`);
+          this.logger.warn(
+            `Failed to process avatar URL: ${err instanceof Error ? err.message : 'Unknown error'}`,
+          );
         }
       }
 

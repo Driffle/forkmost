@@ -91,9 +91,7 @@ export class ImportAttachmentService {
     >();
 
     // Analyze attachments to identify Draw.io pairs
-    const { drawioPairs, skipFiles } = this.analyzeAttachments(
-      pageAttachments,
-    );
+    const { drawioPairs, skipFiles } = this.analyzeAttachments(pageAttachments);
 
     // Map to store processed Draw.io SVGs
     const drawioSvgMap = new Map<
@@ -206,7 +204,10 @@ export class ImportAttachmentService {
         const dir = path.posix.dirname(relPath);
         const aliasKey = `${dir}/${attachment.fileName}`;
         if (!attachmentCandidates.has(aliasKey)) {
-          attachmentCandidates.set(aliasKey, attachmentCandidates.get(relPath)!);
+          attachmentCandidates.set(
+            aliasKey,
+            attachmentCandidates.get(relPath)!,
+          );
           attachmentNameByRelPath.set(aliasKey, attachment.fileName);
         }
       }
@@ -374,9 +375,7 @@ export class ImportAttachmentService {
 
       const { attachmentId, apiFilePath } = processFile(relPath);
 
-      $aud
-        .attr('src', apiFilePath)
-        .attr('data-attachment-id', attachmentId);
+      $aud.attr('src', apiFilePath).attr('data-attachment-id', attachmentId);
 
       unwrapFromParagraph($, $aud);
     }
@@ -447,7 +446,15 @@ export class ImportAttachmentService {
       const { attachmentId, apiFilePath, abs } = processFile(relPath);
       const ext = path.extname(relPath).toLowerCase();
 
-      const audioExtensions = new Set(['.mp3', '.wav', '.ogg', '.m4a', '.webm', '.flac', '.aac']);
+      const audioExtensions = new Set([
+        '.mp3',
+        '.wav',
+        '.ogg',
+        '.m4a',
+        '.webm',
+        '.flac',
+        '.aac',
+      ]);
 
       if (ext === '.pdf') {
         const $pdf = $('<div>')
@@ -664,9 +671,7 @@ export class ImportAttachmentService {
     return $.root().html() || '';
   }
 
-  private analyzeAttachments(
-    attachments: AttachmentInfo[],
-  ): {
+  private analyzeAttachments(attachments: AttachmentInfo[]): {
     drawioPairs: Map<string, DrawioPair>;
     skipFiles: Set<string>;
   } {

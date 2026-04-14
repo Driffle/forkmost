@@ -1,13 +1,16 @@
 services:
   forkmost:
-    image: ghcr.io/vito0912/forkmost:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: forkmost-local:latest
     depends_on:
       - db
       - redis
     environment:
       APP_URL: 'http://localhost:3000'
-      APP_SECRET: 'REPLACE_WITH_LONG_SECRET'
-      DATABASE_URL: 'postgresql://docmost:STRONG_DB_PASSWORD@db:5432/docmost'
+      APP_SECRET: '${APP_SECRET}'
+      DATABASE_URL: 'postgresql://docmost:STRONG_DB_PASSWORD@db:5432/forkmost'
       REDIS_URL: 'redis://redis:6379'
     ports:
       - "3000:3000"

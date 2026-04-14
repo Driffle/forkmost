@@ -40,7 +40,7 @@ export class AttachmentService {
     private readonly spaceRepo: SpaceRepo,
     @InjectKysely() private readonly db: KyselyDB,
     @InjectQueue(QueueName.ATTACHMENT_QUEUE) private attachmentQueue: Queue,
-  ) { }
+  ) {}
 
   async uploadFile(opts: {
     filePromise: Promise<MultipartFile>;
@@ -172,10 +172,18 @@ export class AttachmentService {
       try {
         const currentFilePath = `${getAttachmentFolderPath(type, workspaceId)}/${oldFileName}`;
         const currentFile = await this.storageService.read(currentFilePath);
-        const currentBuffer = Buffer.isBuffer(currentFile) ? currentFile : Buffer.from(currentFile);
+        const currentBuffer = Buffer.isBuffer(currentFile)
+          ? currentFile
+          : Buffer.from(currentFile);
 
-        const newHash = createHash('sha256').update(preparedFile.buffer).digest('hex').substring(0, 16);
-        const currentHash = createHash('sha256').update(currentBuffer).digest('hex').substring(0, 16);
+        const newHash = createHash('sha256')
+          .update(preparedFile.buffer)
+          .digest('hex')
+          .substring(0, 16);
+        const currentHash = createHash('sha256')
+          .update(currentBuffer)
+          .digest('hex')
+          .substring(0, 16);
 
         if (newHash === currentHash) {
           return await this.attachmentRepo.findByFilePath(currentFilePath);

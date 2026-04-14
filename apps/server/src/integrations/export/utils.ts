@@ -95,7 +95,10 @@ export function replaceInternalLinks(
             // if link and text are same, use page title
             if (markLink === node.text) {
               //@ts-expect-error
-              node.text = getInternalLinkPageName(relativePath, currentPagePath);
+              node.text = getInternalLinkPageName(
+                relativePath,
+                currentPagePath,
+              );
             }
           }
         }
@@ -106,7 +109,10 @@ export function replaceInternalLinks(
   return doc.toJSON();
 }
 
-export function getInternalLinkPageName(path: string, currentFilePath?: string): string {
+export function getInternalLinkPageName(
+  path: string,
+  currentFilePath?: string,
+): string {
   const name = path?.split('/').pop().split('.').slice(0, -1).join('.');
   try {
     return decodeURIComponent(name);
@@ -140,7 +146,7 @@ export function buildTree(pages: Page[]): PageExportTree {
       titleCount[parentPageId] = {};
     }
 
-    let title = sanitize(getPageTitle(page.title), { replacement: '-'});
+    let title = sanitize(getPageTitle(page.title), { replacement: '-' });
 
     if (titleCount[parentPageId][title]) {
       title = `${title} (${titleCount[parentPageId][title]})`;

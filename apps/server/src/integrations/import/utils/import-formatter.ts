@@ -346,8 +346,7 @@ export async function rewriteInternalLinksToMentionHtml(
 
     const linkText = $a.text().trim();
     const titleMatch =
-      linkText === meta.title ||
-      linkText === meta.title?.trim();
+      linkText === meta.title || linkText === meta.title?.trim();
 
     if (titleMatch) {
       const mentionId = v7();
