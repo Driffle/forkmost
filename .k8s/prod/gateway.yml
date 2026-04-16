@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: be-wiki
+  namespace: services
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: be-wiki
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: be-wiki-redis
+  namespace: services
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: be-wiki-redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+
+
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: be-wiki
+#   namespace: services
+#   annotations:
+#     konghq.com/protocols: 'https'
+#     konghq.com/strip-path: 'false'
+# spec:
+#   ingressClassName: kong
+#   rules:
+#     - host: wiki.driffle.com
+#       http:
+#         paths:
+#           - pathType: Prefix
+#             path: /
+#             backend:
+#               service:
+#                 name: be-wiki
+#                 port:
+#                   name: http
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: be-wiki-internal
+  namespace: services
+  annotations:
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/healthcheck-path: '/api/health'
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '10'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '3'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+spec:
+  ingressClassName: internal-alb
+  rules:
+    - host: wiki.prod.driffle.com
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: be-wiki
+                port:
+                  name: http
