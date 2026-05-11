@@ -80,7 +80,7 @@
     "happy-dom": "20.8.9",
     "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
-    "kysely": "^0.28.14",
+    "kysely": "^0.28.17",
     "kysely-migration-cli": "^0.4.2",
     "kysely-postgres-js": "^3.0.0",
     "ldapts": "^8.1.7",
