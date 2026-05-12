@@ -355,9 +355,53 @@ export class OidcService {
           .filter((g) => g.length > 0);
 
         if (allowedGroups.length > 0) {
-          const userGroups = (userinfo.groups as string[]) || [];
+          const rawGroupsClaim = (userinfo as any).groups;
+          const userGroups: string[] = Array.isArray(rawGroupsClaim)
+            ? rawGroupsClaim
+            : [];
 
-          if (!Array.isArray(userGroups)) {
+          const groupsClaimPresent = rawGroupsClaim !== undefined;
+          const claimType = rawGroupsClaim === null
+            ? 'null'
+            : Array.isArray(rawGroupsClaim)
+              ? 'array'
+              : typeof rawGroupsClaim;
+
+          this.logger.warn(
+            {
+              workspaceId,
+              issuer: authProvider.oidcIssuer,
+              sub: claims.sub,
+              email: (userinfo as any).email,
+              allowedGroups,
+              groupsClaimPresent,
+              groupsClaimType: claimType,
+              userGroups,
+              userinfoKeys: Object.keys(userinfo || {}),
+            },
+            'OIDC group check evaluating',
+          );
+
+          if (!groupsClaimPresent) {
+            this.logger.error(
+              {
+                workspaceId,
+                issuer: authProvider.oidcIssuer,
+                allowedGroups,
+                userinfoKeys: Object.keys(userinfo || {}),
+              },
+              `OIDC provider did not return a "groups" claim on UserInfo. ` +
+                `oidcAllowedGroups is configured but this IdP does not emit groups ` +
+                `(common for Google: accounts.google.com). ` +
+                `Either clear auth_providers.oidc_allowed_groups for this provider, ` +
+                `or switch to an IdP that returns groups (Azure AD, Okta, Keycloak with groups mapper).`,
+            );
+            throw new UnauthorizedException(
+              'OIDC provider did not return a groups claim. Contact your administrator.',
+            );
+          }
+
+          if (!Array.isArray(rawGroupsClaim)) {
             throw new UnauthorizedException(
               'User has no groups or groups format is invalid from OIDC provider',
             );
@@ -368,6 +412,16 @@ export class OidcService {
           );
 
           if (!hasAllowedGroup) {
+            this.logger.warn(
+              {
+                workspaceId,
+                sub: claims.sub,
+                email: (userinfo as any).email,
+                allowedGroups,
+                userGroups,
+              },
+              'OIDC user rejected: no overlap between user groups and allowed groups',
+            );
             throw new UnauthorizedException(
               'User does not belong to any allowed group',
             );
